@@ -1,4 +1,4 @@
-
+import java.lang.Math;
 public class SpellChecker {
 
 
@@ -11,11 +11,29 @@ public class SpellChecker {
 	}
 
 	public static String tail(String str) {
-		// Your code goes here
+		return str.substring(1);
 	}
 
 	public static int levenshtein(String word1, String word2) {
-		// Your code goes here
+		String word1Lower = word1.toLowerCase();
+		if (word1Lower.length() == 0){
+			return word2.length();
+		}
+		else if(word2.length() == 0){
+			return word1Lower.length();
+		}
+		else if(word1Lower.charAt(0) == word2.charAt(0)){
+			return levenshtein(tail(word1Lower), tail(word2));
+		}
+		else{
+			return 1 + Math.min(
+                Math.min(
+				levenshtein(tail(word1Lower), word2), // Insertion
+                levenshtein(word1Lower, tail(word2)) // Deletion
+				),
+                levenshtein(tail(word1Lower), tail(word2)) // Substitution
+        );
+		}	
 	}
 
 	public static String[] readDictionary(String fileName) {
@@ -23,13 +41,29 @@ public class SpellChecker {
 
 		In in = new In(fileName);
 
-		// Your code here
+		for(int i = 0; i < dictionary.length; i++){
+			dictionary[i] = in.readLine();
+		}
 
 		return dictionary;
 	}
 
 	public static String spellChecker(String word, int threshold, String[] dictionary) {
-		// Your code goes here
+		int currentDistance = 0;
+		int previousDistance = Integer.MAX_VALUE;
+		String spelledWord = "";
+		for(int i = 0; i < dictionary.length; i++){
+			currentDistance = levenshtein(word, dictionary[i]);
+			if (currentDistance < previousDistance) {
+				spelledWord = dictionary[i];
+				previousDistance = currentDistance;
+			}
+		}
+		if (levenshtein(word, spelledWord) <= threshold) {
+			return spelledWord;
+		}
+		else{
+			return word;
+		}
 	}
-
 }
